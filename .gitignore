@@ -360,4 +360,4 @@ poetry.toml
 pyrightconfig.json
 
 # Se omite el archivo media
-.media/profile_pictures
+media/
