@@ -358,3 +358,6 @@ poetry.toml
 
 # LSP config files
 pyrightconfig.json
+
+# Se omite el archivo media
+.media/
