@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provincias - Reflexo</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .province { border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .province-name { font-weight: bold; color: #333; }
+        .province-code { color: #666; font-size: 0.9em; }
+        .province-region { color: #888; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏘️ Lista de Provincias</h1>
+        {% if provinces %}
+            {% for province in provinces %}
+                <div class="province">
+                    <div class="province-name">{{ province.name }}</div>
+                    <div class="province-code">Código: {{ province.ubigeo_code }}</div>
+                    <div class="province-region">Región: {{ province.region.name }}</div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No hay provincias disponibles.</p>
+        {% endif %}
+        <p><a href="/">← Volver al inicio</a></p>
+    </div>
+</body>
+</html>

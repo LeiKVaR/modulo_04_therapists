@@ -6,6 +6,8 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('therapists.urls')),  # Incluye todas las URLs de therapists en la raíz
+    path('reflexo/', include('Reflexo.urls')),  # Incluye las URLs de Reflexo con prefijo
+    path('', include('Reflexo.urls')),  # Incluye las URLs de Reflexo sin prefijo para compatibilidad con tests
 ]
 
 if settings.DEBUG:

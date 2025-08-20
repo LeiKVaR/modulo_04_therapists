@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distritos - Reflexo</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .district { border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .district-name { font-weight: bold; color: #333; }
+        .district-code { color: #666; font-size: 0.9em; }
+        .district-location { color: #888; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏙️ Lista de Distritos</h1>
+        {% if districts %}
+            {% for district in districts %}
+                <div class="district">
+                    <div class="district-name">{{ district.name }}</div>
+                    <div class="district-code">Código: {{ district.ubigeo_code }}</div>
+                    <div class="district-location">
+                        Provincia: {{ district.province.name }} | 
+                        Región: {{ district.province.region.name }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No hay distritos disponibles.</p>
+        {% endif %}
+        <p><a href="/">← Volver al inicio</a></p>
+    </div>
+</body>
+</html>
