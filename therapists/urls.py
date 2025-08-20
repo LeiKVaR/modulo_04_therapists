@@ -23,7 +23,7 @@ router.register(r'schedules', ScheduleViewSet, basename='schedule')
 urlpatterns = [
     path('', index, name='therapists_index'),  # Página principal en /
     path('', include(router.urls)),  # APIs disponibles en la raíz
-    path('distritos/', views_distrito.district_detail(), name='distrito_list'),
-    path('provincias/', views_provincia.province_detail(), name='province_list'),
-    path('regiones/', views_region.region_detail(), name='region_list'),
+    path('distritos/', views_distrito.district_detail, name='distrito_list'),
+    path('provincias/', views_provincia.province_detail, name='province_list'),
+    path('regiones/', views_region.region_detail, name='region_list'),
 ]
