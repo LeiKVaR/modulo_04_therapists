@@ -1,4 +1,5 @@
 from django.db import models
+from Reflexo.models import Region, Province, District
 
 class Therapist(models.Model):
     # Datos personales
@@ -15,12 +16,19 @@ class Therapist(models.Model):
     # Información de contacto
     phone = models.CharField(max_length=15)  # Teléfono
     email = models.EmailField(blank=True, null=True)  # Correo Electrónico
-    country = models.CharField(max_length=100, blank=True, null=True) # País
-    department = models.CharField(max_length=100, blank=True, null=True) # Departamento
-    province = models.CharField(max_length=100, blank=True, null=True) # Provincia
-    district = models.CharField(max_length=100, blank=True, null=True) # Distrito
+    
+    # Ubicación usando relaciones con Reflexo
+    region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Región")
+    province = models.ForeignKey(Province, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Provincia")
+    district = models.ForeignKey(District, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Distrito")
+    
+    # Campos de texto para compatibilidad (opcionales)
     address = models.TextField(blank=True, null=True)  # Dirección de Domicilio
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True) # Foto de Perfil
 
     def __str__(self):
         return f"{self.first_name} {self.last_name_paternal} {self.last_name_maternal or ''}"
+    
+    class Meta:
+        verbose_name = "Terapeuta"
+        verbose_name_plural = "Terapeutas"

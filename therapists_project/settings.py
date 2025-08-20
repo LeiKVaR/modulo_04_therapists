@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework', # Codigo agregado Chris
     'therapists', # Codigo agregado Chris
     'corsheaders', # Permite que otras IP locales externas puedan interactuar con mi IP local
+    'Reflexo', # Aplicación de Ubigeo y datos geográficos
 ]
 
 MIDDLEWARE = [

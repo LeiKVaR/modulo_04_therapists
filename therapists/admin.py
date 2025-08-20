@@ -3,10 +3,11 @@ from .models import Therapist, Specialization, Certification, Schedule
 
 @admin.register(Therapist)
 class TherapistAdmin(admin.ModelAdmin):
-    list_display = ['first_name', 'last_name_paternal', 'last_name_maternal', 'document_number', 'is_active']
-    list_filter = ['is_active', 'gender', 'country', 'department']
+    list_display = ['first_name', 'last_name_paternal', 'last_name_maternal', 'document_number', 'region', 'province', 'is_active']
+    list_filter = ['is_active', 'gender', 'region', 'province']
     search_fields = ['first_name', 'last_name_paternal', 'last_name_maternal', 'document_number', 'email']
     list_editable = ['is_active']
+    autocomplete_fields = ['region', 'province', 'district']
 
 @admin.register(Specialization)
 class SpecializationAdmin(admin.ModelAdmin):
