@@ -6,7 +6,7 @@ from therapists.models import Therapist
 def api_client():
     """Cliente de pruebas de la API"""
     return APIClient()
-
+ 
 @pytest.fixture
 def therapist_data():
     """Datos de un terapeuta de prueba"""
