@@ -7,7 +7,6 @@ class TherapistAdmin(admin.ModelAdmin):
     list_filter = ['is_active', 'gender', 'region', 'province']
     search_fields = ['first_name', 'last_name_paternal', 'last_name_maternal', 'document_number', 'email']
     list_editable = ['is_active']
-    autocomplete_fields = ['region', 'province', 'district']
 
 @admin.register(Specialization)
 class SpecializationAdmin(admin.ModelAdmin):

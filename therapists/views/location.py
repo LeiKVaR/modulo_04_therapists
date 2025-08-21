@@ -61,7 +61,7 @@ def get_provinces_for_form(request):
         if region_id:
             # Validar que la región existe
             try:
-                region = Region.objects.get(id=region_id)
+                region = Region.objects.get(ubigeo_code=region_id)
                 provinces = CascadingLocationSerializer.get_provinces_for_form(region_id=region_id)
                 logger.info(f"Provinces for region {region.name} (ID: {region_id}): {len(provinces)} found")
             except ObjectDoesNotExist:
@@ -93,7 +93,7 @@ def get_districts_for_form(request):
         if province_id:
             # Validar que la provincia existe
             try:
-                province = Province.objects.get(id=province_id)
+                province = Province.objects.get(ubigeo_code=province_id)
                 districts = CascadingLocationSerializer.get_districts_for_form(province_id=province_id)
                 logger.info(f"Districts for province {province.name} (ID: {province_id}): {len(districts)} found")
             except ObjectDoesNotExist:
@@ -104,7 +104,7 @@ def get_districts_for_form(request):
         elif region_id:
             # Validar que la región existe
             try:
-                region = Region.objects.get(id=region_id)
+                region = Region.objects.get(ubigeo_code=region_id)
                 districts = CascadingLocationSerializer.get_districts_for_form(region_id=region_id)
                 logger.info(f"Districts for region {region.name} (ID: {region_id}): {len(districts)} found")
             except ObjectDoesNotExist:
@@ -148,7 +148,7 @@ def get_provinces_by_region(request, region_id):
     """Obtiene las provincias de una región específica"""
     try:
         # Validar que la región existe
-        region = Region.objects.get(id=region_id)
+        region = Region.objects.get(ubigeo_code=region_id)
         
         # Filtrar provincias por región
         provinces = Province.objects.filter(region=region).order_by('name')
@@ -190,7 +190,7 @@ def get_districts_by_province(request, province_id):
     """Obtiene los distritos de una provincia específica"""
     try:
         # Validar que la provincia existe
-        province = Province.objects.get(id=province_id)
+        province = Province.objects.get(ubigeo_code=province_id)
         
         # Filtrar distritos por provincia
         districts = District.objects.filter(province=province).order_by('name')

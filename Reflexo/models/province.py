@@ -45,11 +45,3 @@ class ProvincePatient(models.Model):
 class ProvinceTherapist(models.Model):
     province = models.ForeignKey(Province, on_delete=models.CASCADE, related_name='therapists')
     # otros campos...
-
-
-class ProvinceDistrict(models.Model):
-    province = models.ForeignKey(
-        Province,
-        on_delete=models.CASCADE,
-        related_name="province_districts"  # nombre distinto
-    )
