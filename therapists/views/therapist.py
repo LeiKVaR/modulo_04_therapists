@@ -38,6 +38,7 @@ class TherapistViewSet(viewsets.ModelViewSet):
             qs = qs.filter(is_active=False)
         return qs
 
+
     def destroy(self, request, *args, **kwargs):
         """
         Soft delete - marca como inactivo en lugar de eliminar.
