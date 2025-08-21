@@ -87,7 +87,7 @@ Ejemplo de endpoint típico en una app incluida:
 
 - **Django**  
   Framework principal para desarrollo web en Python.  
-  *Versión recomendada: >=4.0*
+  *Versión recomendada: >=5.2*
 
 - **ASGI/WSGI**  
   Interfaces para servidores web y aplicaciones asíncronas.
@@ -95,7 +95,12 @@ Ejemplo de endpoint típico en una app incluida:
 Si existe un archivo `requirements.txt`, las dependencias relevantes serían:
 
 ```plaintext
-Django>=4.0
+Django>=5.2
+djangorestframework
+django-cors-headers
+Pillow
+pytest
+pytest-django
 ```
 
 ---

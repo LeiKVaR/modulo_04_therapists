@@ -84,7 +84,23 @@ class TherapistViewSet(viewsets.ModelViewSet):
         Endpoint para obtener terapeutas inactivos.
         Respeta paginación y serializer.
         """
-        queryset = self.get_queryset().filter(is_active=False)
+        # Obtener directamente terapeutas inactivos sin pasar por get_queryset
+        queryset = (
+            Therapist.objects.select_related("region_fk", "province_fk", "district_fk")
+            .filter(is_active=False)
+        )
+        
+        # Aplicar filtros de ubicación si se especifican
+        region = self.request.query_params.get("region")
+        province = self.request.query_params.get("province")
+        district = self.request.query_params.get("district")
+        if region:
+            queryset = queryset.filter(region_fk_id=region)
+        if province:
+            queryset = queryset.filter(province_fk_id=province)
+        if district:
+            queryset = queryset.filter(district_fk_id=district)
+        
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)

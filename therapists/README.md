@@ -1,6 +1,6 @@
 # 📦 therapists
 
-Carpeta principal de la aplicación Django para la gestión de terapeutas y sus especialidades.
+Carpeta principal de la aplicación Django para la gestión de terapeutas y ubicación geográfica.
 
 ---
 
@@ -14,14 +14,39 @@ therapists/
 ├── migrations/
 │   ├── __init__.py
 │   └── [archivos de migración]
-├── models.py
-├── serializers.py
-├── tests.py
+├── models/
+│   ├── __init__.py
+│   ├── therapist.py
+│   ├── region.py
+│   ├── province.py
+│   └── district.py
+├── views/
+│   ├── __init__.py
+│   ├── therapist.py
+│   ├── location.py
+│   ├── region.py
+│   ├── province.py
+│   └── district.py
+├── serializers/
+│   ├── __init__.py
+│   ├── therapist.py
+│   └── location.py
+├── services/
+│   ├── __init__.py
+│   └── therapist_service.py
+├── tests/
+│   ├── __init__.py
+│   ├── test_models.py
+│   ├── test_views.py
+│   ├── test_services.py
+│   └── conftest.py
+├── management/
+│   └── commands/
+│       ├── __init__.py
+│       └── import_ubigeo.py
 ├── urls.py
-├── views.py
-├── templates/
-│   └── therapists_ui.html
-└── [otros archivos auxiliares]
+├── README.md
+└── API_ENDPOINTS.md
 ```
 
 - **`__init__.py`**  
@@ -36,23 +61,41 @@ therapists/
 - **`migrations/`**  
   Archivos de migración para la base de datos.
 
-- **`models.py`**  
-  Define los modelos principales: `Therapist` y `Specialty`, incluyendo sus campos y relaciones.
+- **`models/`**  
+  Define los modelos de datos organizados por funcionalidad:
+  - `therapist.py`: Modelo principal de terapeutas con campos personales, contacto y ubicación geográfica
+  - `region.py`, `province.py`, `district.py`: Modelos de ubicación geográfica (sistema de ubigeo)
 
-- **`serializers.py`**  
-  Serializadores para transformar los modelos en JSON y validar datos recibidos por la API.
+- **`views/`**  
+  Vistas y controladores organizados por funcionalidad:
+  - `therapist.py`: Vistas para gestión de terapeutas (CRUD completo con soft delete)
+  - `location.py`, `region.py`, `province.py`, `district.py`: Vistas para ubicaciones geográficas
 
-- **`tests.py`**  
-  Pruebas unitarias para asegurar la calidad y funcionamiento de la app.
+- **`serializers/`**  
+  Serializadores para la API REST organizados por funcionalidad:
+  - `therapist.py`: Serializadores para terapeutas con validaciones y campos anidados
+  - `location.py`: Serializadores para ubicaciones
+
+- **`services/`**  
+  Lógica de negocio y servicios organizados por funcionalidad:
+  - `therapist_service.py`: Lógica para terapeutas (CRUD, soft delete, restauración)
+
+- **`tests/`**  
+  Pruebas unitarias y de integración:
+  - `test_models.py`: Pruebas de modelos
+  - `test_views.py`: Pruebas de vistas
+  - `test_services.py`: Pruebas de servicios
+  - `conftest.py`: Configuración de pytest
+
+- **`management/commands/`**  
+  Comandos personalizados de Django:
+  - `import_ubigeo.py`: Comando para importar datos geográficos desde CSV
 
 - **`urls.py`**  
   Rutas específicas de la app, conectando los endpoints API y vistas web.
 
-- **`views.py`**  
-  Lógica de las vistas: CRUD, búsqueda, gestión de especialidades y manejo de imágenes.
-
-- **`templates/therapists_ui.html`**  
-  Interfaz HTML opcional para visualización y pruebas manuales.
+- **`API_ENDPOINTS.md`**  
+  Documentación completa de todos los endpoints de la API.
 
 ---
 
@@ -64,17 +107,21 @@ therapists/
 **Responsabilidad:**  
 Define las rutas de la app, conectando los endpoints RESTful y vistas web.
 
-### Ejemplo de rutas definidas
+### Rutas definidas
 
 ```python
-from django.urls import path
-from . import views
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(r'therapists', TherapistViewSet, basename='therapist')
+router.register(r"regions", RegionViewSet, basename="region")
+router.register(r"provinces", ProvinceViewSet, basename="province")
+router.register(r"districts", DistrictViewSet, basename="district")
 
 urlpatterns = [
-    path('', views.TherapistListView.as_view(), name='therapist-list'),
-    path('<int:pk>/', views.TherapistDetailView.as_view(), name='therapist-detail'),
-    path('specialties/', views.SpecialtyListView.as_view(), name='specialty-list'),
-    # Otros endpoints y vistas
+    path('', index, name='therapists_index'),  # Página principal en /
+    path('', include(router.urls)),  # APIs disponibles en la raíz
 ]
 ```
 
@@ -83,39 +130,44 @@ urlpatterns = [
 ## 🗂️ Documentación de Endpoints API
 
 **Archivo:**  
-- `therapists/urls.py` (o `api_urls.py` si está separado)
+- `therapists/API_ENDPOINTS.md`
 
 ### Endpoints disponibles
 
 | Método | Ruta                          | Descripción                                 | Parámetros         |
 |--------|-------------------------------|---------------------------------------------|--------------------|
-| GET    | `/api/therapists/`            | Lista todos los terapeutas                  | `search` (query)   |
-| POST   | `/api/therapists/`            | Crea un nuevo terapeuta                     | JSON body          |
-| GET    | `/api/therapists/<id>/`       | Obtiene un terapeuta específico             | `id` (path)        |
-| PUT    | `/api/therapists/<id>/`       | Actualiza un terapeuta                      | `id` (path), body  |
-| DELETE | `/api/therapists/<id>/`       | Elimina un terapeuta                        | `id` (path)        |
+| GET    | `/therapists/`                | Lista todos los terapeutas                  | `search`, `active`, `region`, `province`, `district` |
+| POST   | `/therapists/`                | Crea un nuevo terapeuta                     | JSON body          |
+| GET    | `/therapists/<id>/`           | Obtiene un terapeuta específico             | `id` (path)        |
+| PUT    | `/therapists/<id>/`           | Actualiza un terapeuta                      | `id` (path), body  |
+| PATCH  | `/therapists/<id>/`           | Actualiza parcialmente un terapeuta         | `id` (path), body  |
+| DELETE | `/therapists/<id>/`           | Soft delete de un terapeuta                 | `id` (path)        |
+| GET    | `/therapists/inactive/`       | Lista terapeutas inactivos                  | Query params       |
+| POST   | `/therapists/<id>/restore/`   | Restaura un terapeuta eliminado             | `id` (path)        |
 
-#### Ejemplo de respuesta (GET `/api/therapists/`):
+#### Ejemplo de respuesta (GET `/therapists/`):
 
 ```json
 [
-  {
-    "id": 1,
-    "document_type": "DNI",
-    "document_number": "12345678",
-    "first_name": "Ana",
-    "last_name_paternal": "García",
-    "last_name_maternal": "López",
-    "birth_date": "1990-01-01",
-    "gender": "Femenino",
-    "phone": "999999999",
-    "email": "ana@example.com",
-    "location": "Lima",
-    "address": "Av. Siempre Viva 123",
-    "personal_reference": "Referencia",
-    "is_active": true,
-    "profile_picture": "url/imagen.jpg",
-  }
+    {
+        "id": 1,
+        "region_fk": 1,
+        "province_fk": 1,
+        "district_fk": 1,
+        "document_type": "DNI",
+        "document_number": "75195815",
+        "last_name_paternal": "El tesyet",
+        "last_name_maternal": "User",
+        "first_name": "API",
+        "birth_date": "1990-01-24",
+        "gender": "M",
+        "personal_reference": "",
+        "is_active": true,
+        "phone": "999999999",
+        "email": "test_unop@gmail.com",
+        "address": "",
+        "profile_picture": null
+    }
 ]
 ```
 
@@ -127,13 +179,39 @@ urlpatterns = [
 - **Django REST Framework**: Para la creación de la API REST.
 - **SQLite**: Base de datos por defecto (puede cambiarse en producción).
 - **Pillow**: Manejo de imágenes (para fotos de perfil).
+- **pytest**: Framework de testing.
 
 **Dependencias en `requirements.txt`:**
 ```
-Django>=3.2
+Django>=5.2
 djangorestframework
+django-cors-headers
 Pillow
+pytest
+pytest-django
 ```
+
+---
+
+## 🔍 Características Principales
+
+### Gestión de Terapeutas
+- **CRUD completo** con operaciones de creación, lectura, actualización y eliminación
+- **Soft delete** para mantener historial de terapeutas eliminados
+- **Restauración** de terapeutas eliminados
+- **Búsqueda avanzada** por múltiples criterios
+- **Filtrado geográfico** por región, provincia y distrito
+
+### Sistema de Ubicación
+- **Modelo de ubigeo** completo (región, provincia, distrito)
+- **Relaciones jerárquicas** entre entidades geográficas
+- **Comando de importación** para datos geográficos desde CSV
+
+### API REST
+- **Endpoints RESTful** para terapeutas y ubicación geográfica
+- **Serialización inteligente** con campos anidados
+- **Validaciones robustas** en entrada de datos
+- **Filtrado y búsqueda** avanzados
 
 ---
 
@@ -143,5 +221,8 @@ Pillow
 - [x] Rutas principales documentadas
 - [x] Ejemplo de endpoints y respuestas
 - [x] Tecnologías y dependencias listadas
-
----
+- [x] Estructura organizada por funcionalidad
+- [x] Características principales documentadas
+- [x] Información de modelos actualizada
+- [x] Endpoints reales documentados
+- [x] Eliminadas referencias a funcionalidades no implementadas

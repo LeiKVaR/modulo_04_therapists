@@ -2,11 +2,16 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
-from ..models import Therapist, Specialization, Certification, Schedule
-from datetime import date, time
+from ..models import Therapist, Region, Province, District
+from datetime import date
 
 class TherapistViewsTest(APITestCase):
     def setUp(self):
+        # Crear datos de ubicación necesarios
+        self.region = Region.objects.create(ubigeo_code='15', name='Lima')
+        self.province = Province.objects.create(ubigeo_code='1501', name='Lima', region=self.region)
+        self.district = District.objects.create(ubigeo_code='150101', name='Lima', province=self.province)
+        
         self.therapist_data = {
             'document_type': 'DNI',
             'document_number': '12345678',
@@ -14,9 +19,12 @@ class TherapistViewsTest(APITestCase):
             'last_name_maternal': 'López',
             'first_name': 'Juan',
             'birth_date': '1990-01-01',
-            'gender': 'M',  # Cambiado de 'Masculino' a 'M'
+            'gender': 'M',
             'phone': '123456789',
-            'email': 'juan@gmail.com'  # Cambiado para terminar en @gmail.com
+            'email': 'juan@gmail.com',
+            'region_fk': self.region.id,
+            'province_fk': self.province.id,
+            'district_fk': self.district.id
         }
         self.therapist = Therapist.objects.create(**{
             'document_type': 'DNI',
@@ -25,9 +33,12 @@ class TherapistViewsTest(APITestCase):
             'last_name_maternal': 'López',
             'first_name': 'Juan',
             'birth_date': date(1990, 1, 1),
-            'gender': 'M',  # Cambiado de 'Masculino' a 'M'
+            'gender': 'M',
             'phone': '123456789',
-            'email': 'juan@gmail.com'  # Cambiado para terminar en @gmail.com
+            'email': 'juan@gmail.com',
+            'region_fk': self.region,
+            'province_fk': self.province,
+            'district_fk': self.district
         })
 
     def test_create_therapist(self):
@@ -64,61 +75,52 @@ class TherapistViewsTest(APITestCase):
         self.therapist.refresh_from_db()
         self.assertTrue(self.therapist.is_active)
 
-class SpecializationViewsTest(APITestCase):
-    def test_create_specialization(self):
-        data = {
-            'name': 'Psicología Clínica',
-            'description': 'Especialidad en psicología clínica'
-        }
-        url = reverse('specialization-list')
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Specialization.objects.count(), 1)
+    def test_update_therapist(self):
+        url = reverse('therapist-detail', args=[self.therapist.id])
+        update_data = {'first_name': 'Pedro'}
+        response = self.client.patch(url, update_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.therapist.refresh_from_db()
+        self.assertEqual(self.therapist.first_name, 'Pedro')
 
-class CertificationViewsTest(APITestCase):
+class LocationViewsTest(APITestCase):
     def setUp(self):
-        self.therapist = Therapist.objects.create(
-            document_type='DNI',
-            document_number='12345678',
-            last_name_paternal='García',
-            first_name='Juan',
-            birth_date=date(1990, 1, 1),
-            gender='M',  # Cambiado de 'Masculino' a 'M'
-            phone='123456789'
-        )
+        self.region = Region.objects.create(ubigeo_code='15', name='Lima')
+        self.province = Province.objects.create(ubigeo_code='1501', name='Lima', region=self.region)
+        self.district = District.objects.create(ubigeo_code='150101', name='Lima', province=self.province)
 
-    def test_create_certification(self):
-        data = {
-            'therapist': self.therapist.id,
-            'name': 'Certificación en Psicología',
-            'issuing_organization': 'Universidad XYZ',
-            'issue_date': '2020-01-01'
-        }
-        url = reverse('certification-list')
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Certification.objects.count(), 1)
+    def test_list_regions(self):
+        url = reverse('region-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
 
-class ScheduleViewsTest(APITestCase):
-    def setUp(self):
-        self.therapist = Therapist.objects.create(
-            document_type='DNI',
-            document_number='12345678',
-            last_name_paternal='García',
-            first_name='Juan',
-            birth_date=date(1990, 1, 1),
-            gender='M',  # Cambiado de 'Masculino' a 'M'
-            phone='123456789'
-        )
+    def test_retrieve_region(self):
+        url = reverse('region-detail', args=[self.region.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], 'Lima')
 
-    def test_create_schedule(self):
-        data = {
-            'therapist': self.therapist.id,
-            'day_of_week': 'monday',
-            'start_time': '09:00:00',
-            'end_time': '17:00:00'
-        }
-        url = reverse('schedule-list')
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Schedule.objects.count(), 1)
+    def test_list_provinces(self):
+        url = reverse('province-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+    def test_retrieve_province(self):
+        url = reverse('province-detail', args=[self.province.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], 'Lima')
+
+    def test_list_districts(self):
+        url = reverse('district-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+    def test_retrieve_district(self):
+        url = reverse('district-detail', args=[self.district.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], 'Lima')

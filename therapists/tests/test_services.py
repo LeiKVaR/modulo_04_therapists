@@ -1,15 +1,15 @@
 from django.test import TestCase
-from ..services import (
-    TherapistService, 
-    SpecializationService, 
-    CertificationService, 
-    ScheduleService
-)
-from ..models import Therapist, Specialization, Certification, Schedule
-from datetime import date, time
+from ..services import TherapistService
+from ..models import Therapist, Region, Province, District
+from datetime import date
 
 class TherapistServiceTest(TestCase):
     def setUp(self):
+        # Crear datos de ubicación necesarios
+        self.region = Region.objects.create(ubigeo_code='15', name='Lima')
+        self.province = Province.objects.create(ubigeo_code='1501', name='Lima', region=self.region)
+        self.district = District.objects.create(ubigeo_code='150101', name='Lima', province=self.province)
+        
         self.therapist = Therapist.objects.create(
             document_type='DNI',
             document_number='12345678',
@@ -17,9 +17,12 @@ class TherapistServiceTest(TestCase):
             last_name_maternal='López',
             first_name='Juan',
             birth_date=date(1990, 1, 1),
-            gender='Masculino',
+            gender='M',
             phone='123456789',
-            email='juan@example.com'
+            email='juan@example.com',
+            region_fk=self.region,
+            province_fk=self.province,
+            district_fk=self.district
         )
 
     def test_get_active_therapists(self):
@@ -48,89 +51,35 @@ class TherapistServiceTest(TestCase):
         self.therapist.refresh_from_db()
         self.assertTrue(self.therapist.is_active)
 
-class SpecializationServiceTest(TestCase):
-    def test_get_active_specializations(self):
-        specialization = Specialization.objects.create(
-            name='Psicología Clínica',
-            description='Especialidad en psicología clínica'
-        )
-        active_specializations = SpecializationService.get_active_specializations()
-        self.assertEqual(active_specializations.count(), 1)
-        self.assertIn(specialization, active_specializations)
+    def test_search_therapists(self):
+        # Buscar por nombre
+        found_therapists = TherapistService.search_therapists('Juan')
+        self.assertEqual(found_therapists.count(), 1)
+        self.assertIn(self.therapist, found_therapists)
 
-    def test_get_specialization_by_name(self):
-        specialization = Specialization.objects.create(
-            name='Psicología Clínica',
-            description='Especialidad en psicología clínica'
-        )
-        found = SpecializationService.get_specialization_by_name('Psicología Clínica')
-        self.assertEqual(found, specialization)
+        # Buscar por apellido
+        found_therapists = TherapistService.search_therapists('García')
+        self.assertEqual(found_therapists.count(), 1)
+        self.assertIn(self.therapist, found_therapists)
 
-class CertificationServiceTest(TestCase):
-    def setUp(self):
-        self.therapist = Therapist.objects.create(
-            document_type='DNI',
-            document_number='12345678',
-            last_name_paternal='García',
-            first_name='Juan',
-            birth_date=date(1990, 1, 1),
-            gender='Masculino',
-            phone='123456789'
-        )
+        # Buscar por documento
+        found_therapists = TherapistService.search_therapists('12345678')
+        self.assertEqual(found_therapists.count(), 1)
+        self.assertIn(self.therapist, found_therapists)
 
-    def test_get_certifications_by_therapist(self):
-        certification = Certification.objects.create(
-            therapist=self.therapist,
-            name='Certificación en Psicología',
-            issuing_organization='Universidad XYZ',
-            issue_date=date(2020, 1, 1)
-        )
-        therapist_certifications = CertificationService.get_certifications_by_therapist(self.therapist.id)
-        self.assertEqual(therapist_certifications.count(), 1)
-        self.assertIn(certification, therapist_certifications)
+        # Buscar por email
+        found_therapists = TherapistService.search_therapists('juan@example.com')
+        self.assertEqual(found_therapists.count(), 1)
+        self.assertIn(self.therapist, found_therapists)
 
-    def test_get_expired_certifications(self):
-        certification = Certification.objects.create(
-            therapist=self.therapist,
-            name='Certificación Expirada',
-            issuing_organization='Universidad XYZ',
-            issue_date=date(2020, 1, 1),
-            expiry_date=date(2021, 1, 1)
-        )
-        expired_certifications = CertificationService.get_expired_certifications()
-        self.assertEqual(expired_certifications.count(), 1)
-        self.assertIn(certification, expired_certifications)
+        # Buscar algo que no existe
+        found_therapists = TherapistService.search_therapists('NoExiste')
+        self.assertEqual(found_therapists.count(), 0)
 
-class ScheduleServiceTest(TestCase):
-    def setUp(self):
-        self.therapist = Therapist.objects.create(
-            document_type='DNI',
-            document_number='12345678',
-            last_name_paternal='García',
-            first_name='Juan',
-            birth_date=date(1990, 1, 1),
-            gender='Masculino',
-            phone='123456789'
-        )
+    def test_soft_delete_therapist_not_found(self):
+        result = TherapistService.soft_delete_therapist(99999)
+        self.assertFalse(result)
 
-    def test_get_therapist_schedule(self):
-        schedule = Schedule.objects.create(
-            therapist=self.therapist,
-            day_of_week='monday',
-            start_time=time(9, 0),
-            end_time=time(17, 0)
-        )
-        therapist_schedule = ScheduleService.get_therapist_schedule(self.therapist.id)
-        self.assertEqual(therapist_schedule.count(), 1)
-        self.assertIn(schedule, therapist_schedule)
-
-    def test_get_available_therapists_by_day(self):
-        schedule = Schedule.objects.create(
-            therapist=self.therapist,
-            day_of_week='monday',
-            start_time=time(9, 0),
-            end_time=time(17, 0)
-        )
-        available_therapists = ScheduleService.get_available_therapists_by_day('monday')
-        self.assertEqual(available_therapists.count(), 1)
-        self.assertIn(self.therapist, available_therapists)
+    def test_restore_therapist_not_found(self):
+        result = TherapistService.restore_therapist(99999)
+        self.assertFalse(result)

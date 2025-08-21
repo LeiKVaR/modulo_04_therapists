@@ -1,248 +1,249 @@
-# 📡 API Endpoints - Sistema de Terapeutas
+# 🚀 API Documentation - Sistema de Gestión de Terapeutas
 
-## 🌐 URLs Externas (Públicas)
+## 📋 Resumen Ejecutivo
 
-### Base URL
-```
-http://localhost:8000/  # Desarrollo local
-```
-
-### Página Principal
-- **GET** `/` - Interfaz web principal de terapeutas
-
-### Panel de Administración
-- **GET** `/admin/` - Panel de administración de Django
+Este documento describe la **API REST completa** del Sistema de Gestión de Terapeutas, que incluye:
+- **Gestión de terapeutas** (CRUD completo con soft delete)
+- **Sistema de ubicación geográfica** (solo lectura)
 
 ---
 
-## 🔌 Endpoints de la API
+## 🌐 Configuración de URLs
 
-### 1. **Terapeutas** (`/therapists/`)
+### Base URLs
+```
+Desarrollo local: http://localhost:8000/
+Producción: https://tu-dominio.com/
+```
+
+### Estructura de URLs
+```
+/                           → Página principal (interfaz web)
+/admin/                     → Panel de administración Django
+/therapists/                → API de terapeutas
+/regions/                   → API de regiones
+/provinces/                 → API de provincias
+/districts/                 → API de distritos
+```
+
+---
+
+## 🔌 APIs Externas (Endpoints Públicos)
+
+### 1. 🧑‍⚕️ **API de Terapeutas** (`/therapists/`)
 
 #### Operaciones CRUD Básicas
 | Método | Endpoint | Descripción | Parámetros |
 |--------|----------|-------------|------------|
-| **GET** | `/therapists/` | Listar todos los terapeutas | Query params |
-| **POST** | `/therapists/` | Crear nuevo terapeuta | JSON body |
-| **GET** | `/therapists/{id}/` | Obtener terapeuta específico | `id` en path |
-| **PUT** | `/therapists/{id}/` | Actualizar terapeuta completo | `id` + JSON body |
-| **PATCH** | `/therapists/{id}/` | Actualizar terapeuta parcial | `id` + JSON body |
-| **DELETE** | `/therapists/{id}/` | Soft delete (marcar inactivo) | `id` en path |
+| **GET** | `/therapists/` | Listar terapeutas | Query params |
+| **POST** | `/therapists/` | Crear terapeuta | JSON body |
+| **GET** | `/therapists/{id}/` | Obtener terapeuta | `id` en path |
+| **PUT** | `/therapists/{id}/` | Actualizar terapeuta | `id` + JSON body |
+| **PATCH** | `/therapists/{id}/` | Actualizar parcial | `id` + JSON body |
+| **DELETE** | `/therapists/{id}/` | Soft delete | `id` en path |
 
 #### Endpoints Especiales
 | Método | Endpoint | Descripción | Parámetros |
 |--------|----------|-------------|------------|
-| **GET** | `/therapists/inactive/` | Listar terapeutas inactivos | Query params |
-| **POST** | `/therapists/{id}/restore/` | Restaurar terapeuta inactivo | `id` en path |
+| **GET** | `/therapists/inactive/` | Listar inactivos | Query params |
+| **POST** | `/therapists/{id}/restore/` | Restaurar terapeuta | `id` en path |
 
 #### Parámetros de Filtrado
 ```
-GET /therapists/?active=true          # Solo activos (default)
+GET /therapists/?active=true          # Solo activos (por defecto)
 GET /therapists/?active=false         # Solo inactivos
-GET /therapists/?region=1             # Por ID de región
-GET /therapists/?province=5           # Por ID de provincia
-GET /therapists/?district=25          # Por ID de distrito
+GET /therapists/?region=15            # Por ID de región
+GET /therapists/?province=1501        # Por ID de provincia
+GET /therapists/?district=150101      # Por ID de distrito
 GET /therapists/?search=ana           # Búsqueda por texto
 ```
 
 #### Campos de Búsqueda
-- `first_name`
-- `last_name_paternal`
-- `last_name_maternal`
-- `document_number`
-- `document_type`
-- `email`
-- `phone`
-- `address`
-- `region_fk__name`
-- `province_fk__name`
-- `district_fk__name`
+- `first_name` - Nombre
+- `last_name_paternal` - Apellido paterno
+- `last_name_maternal` - Apellido materno
+- `document_number` - Número de documento
+- `document_type` - Tipo de documento
+- `email` - Correo electrónico
+- `phone` - Teléfono
+- `address` - Dirección
+- `region_fk__name` - Nombre de región
+- `province_fk__name` - Nombre de provincia
+- `district_fk__name` - Nombre de distrito
 
 ---
 
-### 2. **Especialidades** (`/specializations/`)
+### 2. 🌍 **API de Regiones** (`/regions/`)
 
-#### Operaciones CRUD Completas
+#### Operaciones de Solo Lectura
 | Método | Endpoint | Descripción | Parámetros |
 |--------|----------|-------------|------------|
-| **GET** | `/specializations/` | Listar especialidades | - |
-| **POST** | `/specializations/` | Crear especialidad | JSON body |
-| **GET** | `/specializations/{id}/` | Obtener especialidad | `id` en path |
-| **PUT** | `/specializations/{id}/` | Actualizar especialidad | `id` + JSON body |
-| **PATCH** | `/specializations/{id}/` | Actualizar parcial | `id` + JSON body |
-| **DELETE** | `/specializations/{id}/` | Eliminar especialidad | `id` en path |
+| **GET** | `/regions/` | Listar regiones | - |
+| **GET** | `/regions/{id}/` | Obtener región | `id` en path |
 
 ---
 
-### 3. **Certificaciones** (`/certifications/`)
+### 3. 🏙️ **API de Provincias** (`/provinces/`)
 
-#### Operaciones CRUD Completas
+#### Operaciones de Solo Lectura
 | Método | Endpoint | Descripción | Parámetros |
 |--------|----------|-------------|------------|
-| **GET** | `/certifications/` | Listar certificaciones | - |
-| **POST** | `/certifications/` | Crear certificación | JSON body |
-| **GET** | `/certifications/{id}/` | Obtener certificación | `id` en path |
-| **PUT** | `/certifications/{id}/` | Actualizar certificación | `id` + JSON body |
-| **PATCH** | `/certifications/{id}/` | Actualizar parcial | `id` + JSON body |
-| **DELETE** | `/certifications/{id}/` | Eliminar certificación | `id` en path |
-
----
-
-### 4. **Horarios** (`/schedules/`)
-
-#### Operaciones CRUD Completas
-| Método | Endpoint | Descripción | Parámetros |
-|--------|----------|-------------|------------|
-| **GET** | `/schedules/` | Listar horarios | - |
-| **POST** | `/schedules/` | Crear horario | JSON body |
-| **GET** | `/schedules/{id}/` | Obtener horario | `id` en path |
-| **PUT** | `/schedules/{id}/` | Actualizar horario | `id` + JSON body |
-| **PATCH** | `/schedules/{id}/` | Actualizar parcial | `id` + JSON body |
-| **DELETE** | `/schedules/{id}/` | Eliminar horario | `id` en path |
-
----
-
-### 5. **Ubicaciones Geográficas**
-
-#### Regiones (`/regions/`)
-| Método | Endpoint | Descripción | Parámetros |
-|--------|----------|-------------|------------|
-| **GET** | `/regions/` | Listar todas las regiones | - |
-| **GET** | `/regions/{id}/` | Obtener región específica | `id` en path |
-
-#### Provincias (`/provinces/`)
-| Método | Endpoint | Descripción | Parámetros |
-|--------|----------|-------------|------------|
-| **GET** | `/provinces/` | Listar provincias | Query params |
+| **GET** | `/provinces/` | Listar provincias | - |
 | **GET** | `/provinces/{id}/` | Obtener provincia | `id` en path |
 
-**Filtros disponibles:**
-```
-GET /provinces/?region=1              # Por ID de región
-GET /provinces/?region_ubigeo=15      # Por código UBIGEO de región
-```
+---
 
-#### Distritos (`/districts/`)
+### 4. 🏘️ **API de Distritos** (`/districts/`)
+
+#### Operaciones de Solo Lectura
 | Método | Endpoint | Descripción | Parámetros |
 |--------|----------|-------------|------------|
-| **GET** | `/districts/` | Listar distritos | Query params |
+| **GET** | `/districts/` | Listar distritos | - |
 | **GET** | `/districts/{id}/` | Obtener distrito | `id` en path |
 
-**Filtros disponibles:**
-```
-GET /districts/?province=5             # Por ID de provincia
-GET /districts/?province_ubigeo=1501   # Por código UBIGEO de provincia
-```
-
 ---
 
-## 📊 Ejemplos de Respuestas
+## 📊 Estructura de Datos
 
-### Terapeuta Individual
-```json
-{
-  "id": 1,
-  "document_type": "DNI",
-  "document_number": "12345678",
-  "first_name": "Ana",
-  "last_name_paternal": "García",
-  "last_name_maternal": "López",
-  "birth_date": "1990-01-01",
-  "gender": "Femenino",
-  "phone": "999999999",
-  "email": "ana@example.com",
-  "location": "Lima",
-  "address": "Av. Siempre Viva 123",
-  "personal_reference": "Referencia",
-  "is_active": true,
-  "profile_picture": "http://localhost:8000/media/profile_pictures/ana.jpg",
-  "region_fk": {
-    "id": 15,
-    "name": "Lima",
-    "ubigeo_code": "15"
-  },
-  "province_fk": {
-    "id": 1501,
-    "name": "Lima",
-    "ubigeo_code": "1501"
-  },
-  "district_fk": {
-    "id": 150101,
-    "name": "Lima",
-    "ubigeo_code": "150101"
-  }
-}
-```
-
-### Lista de Regiones
-```json
-[
-  {
-    "id": 1,
-    "name": "Amazonas",
-    "ubigeo_code": "01"
-  },
-  {
-    "id": 15,
-    "name": "Lima",
-    "ubigeo_code": "15"
-  }
-]
-```
-
----
-
-## 🔍 Filtros y Búsquedas
-
-### Filtros por Estado
-- `active=true` - Solo registros activos (por defecto)
-- `active=false` - Solo registros inactivos
-
-### Filtros por Ubicación
-- `region={id}` - Filtrar por ID de región
-- `province={id}` - Filtrar por ID de provincia  
-- `district={id}` - Filtrar por ID de distrito
-
-### Filtros por Código UBIGEO
-- `region_ubigeo={code}` - Filtrar por código UBIGEO de región
-- `province_ubigeo={code}` - Filtrar por código UBIGEO de provincia
-
-### Búsqueda por Texto
-- `search={texto}` - Búsqueda en múltiples campos
-
----
-
-## 📝 Notas Importantes
-
-1. **Soft Delete**: Los terapeutas no se eliminan físicamente, se marcan como inactivos
-2. **Filtros de Ubicación**: Se pueden combinar múltiples filtros
-3. **Búsqueda**: La búsqueda es case-insensitive y busca en múltiples campos
-4. **Paginación**: Todos los endpoints listan con paginación automática
-5. **Relaciones**: Las ubicaciones se incluyen automáticamente en las respuestas
-
----
-
-## 🚀 Uso en Otros Módulos
-
-### Integración Básica
+### Modelo Therapist
 ```python
-import requests
+class Therapist(models.Model):
+    # Datos personales
+    document_type = models.CharField(max_length=10, choices=DOCUMENT_TYPES)
+    document_number = models.CharField(max_length=20, unique=True)
+    last_name_paternal = models.CharField(max_length=100)
+    last_name_maternal = models.CharField(max_length=100, blank=True, null=True)
+    first_name = models.CharField(max_length=100)
+    birth_date = models.DateField()
+    gender = models.CharField(max_length=1, choices=GENDERS)
+    personal_reference = models.CharField(max_length=255, blank=True, null=True)
+    is_active = models.BooleanField(choices=STATUS, default=True)
 
-# Obtener terapeutas de una región específica
-response = requests.get('http://localhost:8000/therapists/?region=15')
-therapists = response.json()
+    # Información de contacto
+    phone = models.CharField(max_length=15)
+    email = models.EmailField(blank=True, null=True)
 
-# Obtener provincias de Lima
-response = requests.get('http://localhost:8000/provinces/?region_ubigeo=15')
-provinces = response.json()
+    # Ubicación con FK
+    region_fk = models.ForeignKey(Region, on_delete=models.PROTECT, null=True, blank=True)
+    province_fk = models.ForeignKey(Province, on_delete=models.PROTECT, null=True, blank=True)
+    district_fk = models.ForeignKey(District, on_delete=models.PROTECT, null=True, blank=True)
+
+    address = models.TextField(blank=True, null=True)
+    profile_picture = models.ImageField(upload_to="profile_pictures/", blank=True, null=True)
 ```
 
-### Importación de Modelos
+### Modelos de Ubicación
 ```python
-from therapists.models import Therapist, Region, Province, District
+class Region(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=100)
+
+class Province(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=100)
+    region = models.ForeignKey(Region, on_delete=models.CASCADE)
+
+class District(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=100)
+    province = models.ForeignKey(Province, on_delete=models.CASCADE)
+```
+
+---
+
+## 🛠️ Servicios Disponibles
+
+### Estructura de Servicios
+```
+therapists/services/
+├── __init__.py
+└── therapist_service.py    # Lógica de terapeutas
+```
+
+### TherapistService
+```python
 from therapists.services import TherapistService
 
-# Usar servicios directamente
-therapist_service = TherapistService()
-active_therapists = therapist_service.get_active_therapists()
+# Crear instancia del servicio
+service = TherapistService()
+
+# Operaciones disponibles
+all_therapists = service.get_all_therapists()
+therapist_by_id = service.get_therapist_by_id(1)
 ```
+
+---
+
+## 🔍 Filtros y Búsqueda
+
+### Filtros por Ubicación
+- **Por Región**: `GET /therapists/?region=15`
+- **Por Provincia**: `GET /therapists/?province=1501`
+- **Por Distrito**: `GET /therapists/?district=150101`
+
+### Filtros por Estado
+- **Solo Activos**: `GET /therapists/?active=true`
+- **Solo Inactivos**: `GET /therapists/?active=false`
+
+### Búsqueda por Texto
+- **Búsqueda General**: `GET /therapists/?search=ana`
+- **Búsqueda por Documento**: `GET /therapists/?search=12345678`
+- **Búsqueda por Email**: `GET /therapists/?search=ana@example.com`
+
+---
+
+## 📝 Ejemplos de Uso
+
+### Crear un Terapeuta
+```bash
+curl -X POST http://localhost:8000/therapists/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "document_type": "DNI",
+    "document_number": "12345678",
+    "first_name": "Ana",
+    "last_name_paternal": "García",
+    "last_name_maternal": "López",
+    "birth_date": "1990-01-01",
+    "gender": "F",
+    "phone": "999999999",
+    "email": "ana@example.com",
+    "region_fk": 15,
+    "province_fk": 1501,
+    "district_fk": 150101,
+    "address": "Av. Siempre Viva 123"
+  }'
+```
+
+### Obtener Terapeutas por Región
+```bash
+curl "http://localhost:8000/therapists/?region=15"
+```
+
+### Buscar Terapeutas por Nombre
+```bash
+curl "http://localhost:8000/therapists/?search=ana"
+```
+
+---
+
+## ✅ Características Implementadas
+
+- [x] CRUD completo de terapeutas
+- [x] Soft delete y restauración
+- [x] Búsqueda y filtrado avanzado
+- [x] Sistema de ubicación geográfica
+- [x] Validaciones robustas
+- [x] API REST completa
+- [x] Documentación detallada
+
+---
+
+## 🚫 Funcionalidades No Implementadas
+
+- ❌ Gestión de especialidades médicas
+- ❌ Gestión de certificaciones profesionales
+- ❌ Gestión de horarios y disponibilidad
+- ❌ Sistema de citas o reservas
+- ❌ Gestión de pacientes
+- ❌ Sistema de pagos

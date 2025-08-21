@@ -2,15 +2,12 @@
 
 ## Descripción
 
-Este módulo proporciona un sistema completo para la gestión de terapeutas, especialidades médicas y ubicaciones geográficas. Implementa una API REST y vistas web para acceder y manipular información de terapeutas, especializaciones, certificaciones, horarios y datos de ubicación (regiones, provincias y distritos).
+Este módulo proporciona un sistema completo para la gestión de terapeutas y ubicaciones geográficas. Implementa una API REST y vistas web para acceder y manipular información de terapeutas y datos de ubicación (regiones, provincias y distritos).
 
 ## Características Principales
 
-- **API REST completa**: Endpoints para operaciones CRUD en todas las entidades del sistema
+- **API REST completa**: Endpoints para operaciones CRUD en terapeutas y ubicación geográfica
 - **Gestión de terapeutas**: Sistema completo de registro y administración de profesionales de la salud
-- **Especialidades médicas**: Categorización y gestión de especialidades terapéuticas
-- **Certificaciones**: Control de certificaciones y credenciales profesionales
-- **Horarios y disponibilidad**: Gestión de agendas y horarios de atención
 - **Sistema de ubicación**: Integración con datos geográficos (regiones, provincias, distritos)
 - **Interfaz web**: Vistas HTML para explorar y gestionar los datos
 - **Importación de datos**: Comandos para importar datos geográficos desde archivos CSV
@@ -20,11 +17,11 @@ Este módulo proporciona un sistema completo para la gestión de terapeutas, esp
 
 - **therapists_project/**: Configuración principal del proyecto Django
 - **therapists/**: Aplicación principal con la lógica de negocio
-  - **models/**: Definición de modelos de datos (terapeutas, especialidades, ubicaciones, etc.)
+  - **models/**: Definición de modelos de datos (terapeutas, ubicaciones)
   - **views/**: Vistas y controladores para la API y páginas web
   - **serializers/**: Serializadores para la API REST
   - **services/**: Lógica de negocio y servicios
-  - **management/**: Comandos personalizados de Django
+  - **management/commands/**: Comandos personalizados de Django
   - **tests/**: Pruebas unitarias y de integración
 - **db/**: Archivos CSV con datos geográficos (regiones, provincias, distritos)
 
@@ -56,14 +53,16 @@ Este módulo proporciona un sistema completo para la gestión de terapeutas, esp
 
 4. Aplica las migraciones:
    ```bash
+   python manage.py makemigrations
+   ```
+
+   ```bash
    python manage.py migrate
    ```
 
 5. Importa los datos geográficos:
    ```bash
-   python manage.py import_ubigeo --file=db/regions.csv
-   python manage.py import_ubigeo --file=db/provinces.csv
-   python manage.py import_ubigeo --file=db/districts.csv
+   python manage.py import_ubigeo --path db --truncate
    ```
 
 6. Inicia el servidor de desarrollo:
@@ -77,11 +76,11 @@ Consulta la documentación detallada en `therapists/API_ENDPOINTS.md` para ver t
 
 Ejemplos básicos:
 
-- Listar terapeutas: `GET /api/therapists/`
-- Crear terapeuta: `POST /api/therapists/`
-- Obtener especialidades: `GET /api/specializations/`
-- Obtener provincias de una región: `GET /api/regions/{region_id}/provinces/`
-- Obtener distritos de una provincia: `GET /api/provinces/{province_id}/districts/`
+- Listar terapeutas: `GET /therapists/`
+- Crear terapeuta: `POST /therapists/`
+- Obtener regiones: `GET /regions/`
+- Obtener provincias de una región: `GET /provinces/?region={region_id}`
+- Obtener distritos de una provincia: `GET /districts/?province={province_id}`
 
 ## Integración con Otros Módulos
 
@@ -99,35 +98,69 @@ Ejecuta las pruebas unitarias y de integración:
 python manage.py test
 ```
 
-O utilizando pytest:
+O usando pytest:
 
 ```bash
 pytest
 ```
 
-## Documentación Adicional
+## Estructura de la Aplicación
 
-Cada carpeta del proyecto contiene un archivo README.md con documentación específica:
+### Modelos
+- `therapist.py`: Modelo principal de terapeutas
+- `region.py`: Modelo de regiones geográficas
+- `province.py`: Modelo de provincias geográficas
+- `district.py`: Modelo de distritos geográficos
 
-- **therapists_project/README.md**: Configuración y estructura del proyecto Django
-- **therapists/README.md**: Estructura general de la aplicación
-- **therapists/API_ENDPOINTS.md**: Documentación completa de todos los endpoints de la API
-- **therapists/models/README.md**: Modelos de datos
-- **therapists/views/README.md**: Vistas y controladores
-- **therapists/serializers/README.md**: Serializadores para la API
-- **therapists/services/README.md**: Servicios y lógica de negocio
-- **therapists/test/README.md**: Pruebas unitarias y de integración
-- **therapists/management/commands/README.md**: Comandos personalizados
-- **db/README.md**: Datos geográficos en CSV
+### Vistas
+- `therapist.py`: Vistas para gestión de terapeutas
+- `location.py`: Vistas para ubicaciones
+- `region.py`: Vistas para regiones
+- `province.py`: Vistas para provincias
+- `district.py`: Vistas para distritos
+
+### Serializers
+- `therapist.py`: Serializadores para terapeutas
+- `location.py`: Serializadores para ubicaciones
+
+### Servicios
+- `therapist_service.py`: Lógica para terapeutas
+
+## Funcionalidades Implementadas
+
+- ✅ CRUD completo de terapeutas
+- ✅ Soft delete y restauración
+- ✅ Búsqueda y filtrado avanzado
+- ✅ Sistema de ubicación geográfica
+- ✅ Validaciones robustas
+- ✅ API REST completa
+- ✅ Documentación detallada
+
+## Funcionalidades No Implementadas
+
+- ❌ Gestión de especialidades médicas
+- ❌ Gestión de certificaciones profesionales
+- ❌ Gestión de horarios y disponibilidad
+- ❌ Sistema de citas o reservas
+- ❌ Gestión de pacientes
+- ❌ Sistema de pagos
+
+## Documentación
+
+- **README.md** (este archivo): Documentación general del proyecto
+- **therapists/README.md**: Estructura detallada de la aplicación
+- **therapists/API_ENDPOINTS.md**: Documentación completa de la API
 
 ## Contribución
 
-1. Haz un fork del repositorio
-2. Crea una rama para tu funcionalidad (`git checkout -b feature/nueva-funcionalidad`)
-3. Realiza tus cambios y haz commit (`git commit -am 'Agrega nueva funcionalidad'`)
-4. Haz push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Crea un Pull Request
+Para contribuir al proyecto:
+
+1. Fork el repositorio
+2. Crea una rama para tu feature
+3. Realiza los cambios necesarios
+4. Ejecuta las pruebas
+5. Envía un pull request
 
 ## Licencia
 
-Este proyecto está licenciado bajo los términos de la licencia MIT.
+Este proyecto está bajo la licencia MIT. Ver el archivo LICENSE para más detalles.
