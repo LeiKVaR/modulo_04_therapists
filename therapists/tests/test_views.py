@@ -14,9 +14,9 @@ class TherapistViewsTest(APITestCase):
             'last_name_maternal': 'López',
             'first_name': 'Juan',
             'birth_date': '1990-01-01',
-            'gender': 'Masculino',
+            'gender': 'M',  # Cambiado de 'Masculino' a 'M'
             'phone': '123456789',
-            'email': 'juan@example.com'
+            'email': 'juan@gmail.com'  # Cambiado para terminar en @gmail.com
         }
         self.therapist = Therapist.objects.create(**{
             'document_type': 'DNI',
@@ -25,9 +25,9 @@ class TherapistViewsTest(APITestCase):
             'last_name_maternal': 'López',
             'first_name': 'Juan',
             'birth_date': date(1990, 1, 1),
-            'gender': 'Masculino',
+            'gender': 'M',  # Cambiado de 'Masculino' a 'M'
             'phone': '123456789',
-            'email': 'juan@example.com'
+            'email': 'juan@gmail.com'  # Cambiado para terminar en @gmail.com
         })
 
     def test_create_therapist(self):
@@ -83,7 +83,7 @@ class CertificationViewsTest(APITestCase):
             last_name_paternal='García',
             first_name='Juan',
             birth_date=date(1990, 1, 1),
-            gender='Masculino',
+            gender='M',  # Cambiado de 'Masculino' a 'M'
             phone='123456789'
         )
 
@@ -107,7 +107,7 @@ class ScheduleViewsTest(APITestCase):
             last_name_paternal='García',
             first_name='Juan',
             birth_date=date(1990, 1, 1),
-            gender='Masculino',
+            gender='M',  # Cambiado de 'Masculino' a 'M'
             phone='123456789'
         )
 

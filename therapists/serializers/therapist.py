@@ -1,52 +1,17 @@
 import re
 from datetime import date
 from rest_framework import serializers
-from ..models import Therapist
-from Reflexo.models import Region, Province, District
-
-class RegionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Region
-        fields = ['id', 'name', 'ubigeo_code']
-
-class ProvinceSerializer(serializers.ModelSerializer):
-    region = RegionSerializer(read_only=True)
-    
-    class Meta:
-        model = Province
-        fields = ['id', 'name', 'ubigeo_code', 'region']
-
-class DistrictSerializer(serializers.ModelSerializer):
-    province = ProvinceSerializer(read_only=True)
-    
-    class Meta:
-        model = District
-        fields = ['id', 'name', 'ubigeo_code', 'province']
+from therapists.models import Therapist, Region, Province, District
 
 class TherapistSerializer(serializers.ModelSerializer):
-    # Campos de ubicación con información detallada
-    region_detail = RegionSerializer(source='region', read_only=True)
-    province_detail = ProvinceSerializer(source='province', read_only=True)
-    district_detail = DistrictSerializer(source='district', read_only=True)
-    
-    # Campos para selección en formularios
-    region_name = serializers.CharField(source='region.name', read_only=True)
-    province_name = serializers.CharField(source='province.name', read_only=True)
-    district_name = serializers.CharField(source='district.name', read_only=True)
-    
+    # usa tus FK actuales *_fk
+    region_fk   = serializers.PrimaryKeyRelatedField(queryset=Region.objects.all(), allow_null=True, required=False)
+    province_fk = serializers.PrimaryKeyRelatedField(queryset=Province.objects.all(), allow_null=True, required=False)
+    district_fk = serializers.PrimaryKeyRelatedField(queryset=District.objects.all(), allow_null=True, required=False)
+
     class Meta:
         model = Therapist
-        fields = [
-            'id', 'document_type', 'document_number', 'last_name_paternal', 
-            'last_name_maternal', 'first_name', 'birth_date', 'gender', 
-            'personal_reference', 'is_active', 'phone', 'email',
-            'region', 'province', 'district',  # IDs para formularios
-            'region_detail', 'province_detail', 'district_detail',  # Información completa
-            'region_name', 'province_name', 'district_name',  # Nombres para display
-            'address', 'profile_picture'
-        ]
-        read_only_fields = ['id', 'region_detail', 'province_detail', 'district_detail', 
-                           'region_name', 'province_name', 'district_name']
+        fields = "__all__"
         extra_kwargs = {
             'email': {
                 'required': False,
@@ -56,6 +21,27 @@ class TherapistSerializer(serializers.ModelSerializer):
                 }
             }
         }
+        
+    def validate(self, attrs):
+        """
+        Asegura coherencia jerárquica:
+        province_fk debe pertenecer a region_fk
+        district_fk debe pertenecer a province_fk
+        """
+        region   = attrs.get("region_fk")   or getattr(self.instance, "region_fk", None)
+        province = attrs.get("province_fk") or getattr(self.instance, "province_fk", None)
+        district = attrs.get("district_fk") or getattr(self.instance, "district_fk", None)
+
+        if province and region and province.region_id != region.id:
+            raise serializers.ValidationError(
+                "La provincia seleccionada no pertenece a la región."
+            )
+        if district and province and district.province_id != province.id:
+            raise serializers.ValidationError(
+                "El distrito seleccionado no pertenece a la provincia."
+            )
+        return attrs
+
     def validate_document_number(self, value):
         doc_type = self.initial_data.get("document_type")
 
@@ -135,6 +121,34 @@ class TherapistSerializer(serializers.ModelSerializer):
             pattern = r'^[A-Za-z0-9._%+-]+@gmail\.com$'
             if not re.match(pattern, value):
                 raise serializers.ValidationError("El correo debe ser válido y terminar en @gmail.com (ejemplo: usuario@gmail.com).")
+        return value
+
+    def validate_country(self, value):
+        if value and not re.match(r"^[A-Za-z0-9\s]+$", value):
+            raise serializers.ValidationError(
+                "El país solo puede contener letras y números."
+            )
+        return value
+
+    def validate_department(self, value):
+        if value and not re.match(r"^[A-Za-z0-9\s]+$", value):
+            raise serializers.ValidationError(
+                "El departamento solo puede contener letras y números."
+            )
+        return value
+
+    def validate_province(self, value):
+        if value and not re.match(r"^[A-Za-z0-9\s]+$", value):
+            raise serializers.ValidationError(
+                "La provincia solo puede contener letras y números."
+            )
+        return value
+
+    def validate_district(self, value):
+        if value and not re.match(r"^[A-Za-z0-9\s]+$", value):
+            raise serializers.ValidationError(
+                "El distrito solo puede contener letras y números."
+            )
         return value
 
     def validate_address(self, value):

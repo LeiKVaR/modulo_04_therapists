@@ -6,7 +6,6 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('therapists.urls')),  # Incluye todas las URLs de therapists en la raíz
-    path('reflexo/', include('Reflexo.urls_simple')),  # Incluye URLs básicas de Reflexo
 ]
 
 if settings.DEBUG:

@@ -1,1 +1,0 @@
-# Este archivo permite que Django descubra las pruebas en este directorio
